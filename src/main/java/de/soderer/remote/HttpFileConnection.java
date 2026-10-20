@@ -29,6 +29,9 @@ import de.soderer.utilities.Utilities;
  * Read-only remote connection to files offered by a web server with directory listings (Apache style "index of" pages).
  * Credentials are sent as URL parameters "username" and "password", so they may show up in server and proxy logs
  * and are transferred unencrypted without TLS.
+ *
+ * There is no home folder, so absolute paths ("/a/b") and relative paths ("a/b") are both resolved against the start
+ * path. {@link #createFolderPath(String)} only succeeds if the folder already exists, as folders cannot be created.
  */
 public class HttpFileConnection implements RemoteConnection {
 	/** Timeout in milliseconds for connecting and for each read */

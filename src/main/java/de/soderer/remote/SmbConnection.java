@@ -30,6 +30,9 @@ import de.soderer.utilities.Utilities;
  *
  * Lost connections (network drop, server restart) are re-established by jcifs automatically
  * on the next operation, as long as close() has not been called.
+ *
+ * A share has no separate home folder, so absolute paths ("/a/b") and relative paths ("a/b") are both resolved
+ * against the share root.
  */
 public class SmbConnection implements RemoteConnection {
 	/** Default port for SMB over TCP. */
@@ -222,8 +225,9 @@ public class SmbConnection implements RemoteConnection {
 	 * Creates a folder including all missing parent folders (like mkdir -p).
 	 *
 	 * @param folderPath path of the folder relative to the share root
-	 * @throws Exception if a folder cannot be created
+	 * @throws Exception if the path exists as file or a folder cannot be created
 	 */
+	@Override
 	public void createFolderPath(final String folderPath) throws Exception {
 		checkForConnection();
 		if (normalizePath(folderPath).length() == 0) {
@@ -257,6 +261,7 @@ public class SmbConnection implements RemoteConnection {
 	 * @return true if the file exists
 	 * @throws Exception if the server cannot be accessed
 	 */
+	@Override
 	public boolean fileExists(final String filePath) throws Exception {
 		checkForConnection();
 		try (SmbFile file = resolve(filePath, false)) {
@@ -271,6 +276,7 @@ public class SmbConnection implements RemoteConnection {
 	 * @return true if the folder exists
 	 * @throws Exception if the server cannot be accessed
 	 */
+	@Override
 	public boolean folderExists(final String folderPath) throws Exception {
 		checkForConnection();
 		try (SmbFile folder = resolve(folderPath, true)) {

@@ -47,6 +47,8 @@ import de.soderer.utilities.Utilities;
  * The server's host key is checked against a known hosts file or an expected fingerprint (see {@link #DISABLE_HOST_KEY_CHECK}).
  * Paths are passed to the remote shell in single quotes. Directory listings are read with "ls" in the C locale,
  * so the output does not depend on the server's language settings.
+ * Relative paths are resolved against the user's home folder, which is the working directory of every command and of
+ * the sftp channel.
  */
 public class SftpConnection implements RemoteConnection {
 	/**
@@ -419,7 +421,36 @@ public class SftpConnection implements RemoteConnection {
 
 	@Override
 	public void createFolder(final String selectedFilePath, final String folderName) throws Exception {
-		executeCommand("mkdir " + quotePathForShell(selectedFilePath + "/" + folderName));
+		// An empty parent must stay relative to the home folder instead of becoming "/folderName"
+		executeCommand("mkdir " + quotePathForShell(RemotePaths.join(selectedFilePath, folderName)));
+	}
+
+	/**
+	 * {@inheritDoc} Symbolic links are followed, like in {@link #getFileInfo(String)}.
+	 */
+	@Override
+	public boolean fileExists(final String filePath) throws Exception {
+		// One command instead of listing and parsing; a missing path and a missing permission both result in false
+		return executeCommandWithResult("test -f " + quotePathForShell(toShellPath(filePath))).isSuccessful();
+	}
+
+	/**
+	 * {@inheritDoc} Symbolic links are followed, like in {@link #getFolderInfo(String)}.
+	 */
+	@Override
+	public boolean folderExists(final String folderPath) throws Exception {
+		return executeCommandWithResult("test -d " + quotePathForShell(toShellPath(folderPath))).isSuccessful();
+	}
+
+	@Override
+	public void createFolderPath(final String folderPath) throws Exception {
+		final String shellPath = toShellPath(folderPath);
+		if (".".equals(shellPath) || "/".equals(shellPath)) {
+			// Home and root folder always exist
+			return;
+		}
+		// "mkdir -p" does nothing for an existing folder and fails if the path or a parent exists as file
+		executeCommand("mkdir -p " + quotePathForShell(shellPath));
 	}
 
 	@Override
@@ -943,6 +974,8 @@ public class SftpConnection implements RemoteConnection {
 
 	@Override
 	public FolderInfo getFolderInfo(String folderPath) throws Exception {
+		// Built before trimming, so "/" stays the root folder and "" means the home folder
+		final String listingPath = toFolderPathWithTrailingSeparator(folderPath);
 		folderPath = FileUtilities.trimTrailingFileSeparator(folderPath);
 
 		String folderName;
@@ -958,7 +991,7 @@ public class SftpConnection implements RemoteConnection {
 		try {
 			channel = session.openChannel("exec");
 			// The trailing "/" makes ls fail for files and follow symbolic links to folders
-			((ChannelExec) channel).setCommand(C_LOCALE_PREFIX + "ls -al " + quotePathForShell(toFolderPathWithTrailingSeparator(folderPath)));
+			((ChannelExec) channel).setCommand(C_LOCALE_PREFIX + "ls -al " + quotePathForShell(listingPath));
 
 			// Streams must be fetched before channel connect
 			try (InputStream inStream = channel.getInputStream();
@@ -1125,14 +1158,26 @@ public class SftpConnection implements RemoteConnection {
 	}
 
 	/**
-	 * Returns a folder path ending with "/" ("/" for an empty path).
+	 * Returns a folder path ending with "/" ("./" for an empty path, which means the home folder).
 	 */
 	private static String toFolderPathWithTrailingSeparator(final String folderPath) {
 		if (Utilities.isEmpty(folderPath)) {
-			return "/";
+			return "./";
 		} else {
 			return folderPath.endsWith("/") ? folderPath : folderPath + "/";
 		}
+	}
+
+	/**
+	 * Returns a path for a shell command: backslashes as "/", trailing separators removed (except for the root folder
+	 * "/") and "." for an empty path, which means the home folder.
+	 */
+	private static String toShellPath(final String path) {
+		String shellPath = path == null ? "" : path.replace("\\", "/");
+		while (shellPath.length() > 1 && shellPath.endsWith("/")) {
+			shellPath = shellPath.substring(0, shellPath.length() - 1);
+		}
+		return shellPath.isEmpty() ? "." : shellPath;
 	}
 
 	/**
@@ -1322,12 +1367,13 @@ public class SftpConnection implements RemoteConnection {
 		final List<FileInfo> fileInfoList = new ArrayList<>();
 		final List<FolderInfo> folderInfoList = new ArrayList<>();
 
-		folderPath = FileUtilities.trimTrailingFileSeparator(folderPath);
+		// Built from the untrimmed path, so "/" stays the root folder and "" means the home folder
+		final String listingPath = toFolderPathWithTrailingSeparator(folderPath);
 
 		Channel channel = null;
 		try {
 			channel = session.openChannel("exec");
-			((ChannelExec) channel).setCommand(C_LOCALE_PREFIX + "ls -al " + quotePathForShell(toFolderPathWithTrailingSeparator(folderPath)));
+			((ChannelExec) channel).setCommand(C_LOCALE_PREFIX + "ls -al " + quotePathForShell(listingPath));
 
 			// Streams must be fetched before channel connect
 			try (InputStream inStream = channel.getInputStream();

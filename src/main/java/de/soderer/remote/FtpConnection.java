@@ -22,6 +22,9 @@ import de.soderer.utilities.FileUtilities;
  * Remote connection via FTP, based on Apache Commons Net. Transfers use binary mode.
  * File and folder information is read via MLST/MLSD (RFC 3659) if the server supports it, otherwise via LIST
  * (e.g. vsftpd). Credentials and data are transferred unencrypted.
+ *
+ * Relative paths are resolved by the server against the working directory, which is the user's home folder after
+ * login. This class never changes the working directory permanently.
  */
 public class FtpConnection implements RemoteConnection {
 	/** Timeout in milliseconds for connecting */
@@ -308,8 +311,10 @@ public class FtpConnection implements RemoteConnection {
 	@Override
 	public void createFolder(final String parentFolderPath, final String folderName) throws Exception {
 		checkForConnection();
-		if (!ftpClient.makeDirectory(parentFolderPath + "/" + folderName)) {
-			throw new Exception("Cannot create folder '" + parentFolderPath + "/" + folderName + "': " + ftpClient.getReplyString());
+		// An empty parent must stay relative to the home folder instead of becoming "/folderName"
+		final String folderPath = RemotePaths.join(parentFolderPath, folderName);
+		if (!ftpClient.makeDirectory(folderPath)) {
+			throw new Exception("Cannot create folder '" + folderPath + "': " + ftpClient.getReplyString());
 		}
 	}
 
@@ -341,9 +346,10 @@ public class FtpConnection implements RemoteConnection {
 	@Override
 	public FolderInfo getFolderInfo(final String folderPath) throws Exception {
 		checkForConnection();
+		final String commandPath = toCommandPath(folderPath);
 
 		if (supportsMlst()) {
-			final FTPFile file = ftpClient.mlistFile(folderPath);
+			final FTPFile file = ftpClient.mlistFile(commandPath);
 			if (file == null || file.isFile()) {
 				return null;
 			} else {
@@ -352,7 +358,7 @@ public class FtpConnection implements RemoteConnection {
 		} else {
 			// Without MLST a folder is detected by changing into it; LIST does not report the folder itself
 			final String currentWorkingDirectory = ftpClient.printWorkingDirectory();
-			if (!ftpClient.changeWorkingDirectory(folderPath)) {
+			if (!ftpClient.changeWorkingDirectory(commandPath)) {
 				return null;
 			}
 			if (currentWorkingDirectory != null && !ftpClient.changeWorkingDirectory(currentWorkingDirectory)) {
@@ -360,6 +366,15 @@ public class FtpConnection implements RemoteConnection {
 			}
 			return new FolderInfo(getFolderName(folderPath), null);
 		}
+	}
+
+	/**
+	 * Returns the path to send in a command. An empty path means the home folder, which is the working directory, so it
+	 * is sent as "." because many servers reject commands with an empty argument.
+	 */
+	private static String toCommandPath(final String path) {
+		final String normalizedPath = path == null ? "" : path.replace("\\", "/");
+		return normalizedPath.isEmpty() ? "." : normalizedPath;
 	}
 
 	private static String getFolderName(final String folderPath) {
@@ -422,7 +437,7 @@ public class FtpConnection implements RemoteConnection {
 	public DirectoryListing getDirectory(String folderPath) throws Exception {
 		checkForConnection();
 
-		folderPath = folderPath.replace("\\", "/");
+		folderPath = toCommandPath(folderPath);
 
 		// One listing provides names, sizes and dates of all entries; MLSD has exact timestamps and a standardized format
 		final FTPFile[] entries = supportsMlst() ? ftpClient.mlistDir(folderPath) : listFilesWithBlankWorkaround(folderPath);
