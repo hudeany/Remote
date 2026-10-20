@@ -9,7 +9,7 @@
 	<property name="commons-net.version" value="3.13.0" />
 	<property name="jsch.version" value="2.28.8" />
 	<property name="jcifs.version" value="3.0.4" />
-	<property name="soderer-utilities.version" value="26.2.118" />
+	<property name="soderer-utilities.version" value="26.2.119" />
 
 	<!-- Maven POM dependencies: "groupId:artifactId:version[:optional]" -->
 	<property name="mavenDependency.commons-net" value="commons-net:commons-net:${commons-net.version}:optional" />
@@ -18,7 +18,7 @@
 	<property name="mavenDependency.soderer-utilities" value="de.soderer:soderer-utilities:${soderer-utilities.version}" />
 
 	<!-- Special: AntBuildHelp is used to download the runtime libraries -->
-	<property name="antbuildhelp.version" value="26.0.12" />
+	<property name="antbuildhelp.version" value="26.0.13" />
 
 	<available file="lib_build/antbuildhelp-${antbuildhelp.version}.jar" property="antbuildhelp.available" />
 	<target name="get_antbuildhelp" unless="antbuildhelp.available">
