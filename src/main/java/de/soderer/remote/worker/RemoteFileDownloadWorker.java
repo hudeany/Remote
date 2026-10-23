@@ -7,6 +7,7 @@ import java.io.OutputStream;
 
 import de.soderer.remote.FileInfo;
 import de.soderer.remote.RemoteConnection;
+import de.soderer.utilities.StringUtilities;
 import de.soderer.utilities.Utilities;
 import de.soderer.utilities.worker.WorkerParentSimple;
 import de.soderer.utilities.worker.WorkerSimple;
@@ -39,7 +40,7 @@ public class RemoteFileDownloadWorker extends WorkerSimple<RemoteFileDownloadWor
 
 		if (connection == null) {
 			throw new Exception("No RemoteConnection");
-		} else if (Utilities.isBlank(remoteFilePath)) {
+		} else if (StringUtilities.isBlank(remoteFilePath)) {
 			throw new Exception("No remoteFilePath");
 		} else if (connection.getFileInfo(remoteFilePath) == null) {
 			throw new Exception("Remote file not found or is no file: \"" + remoteFilePath + "\"");

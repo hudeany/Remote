@@ -2,7 +2,7 @@ package de.soderer.remote;
 
 import java.util.Locale;
 
-import de.soderer.utilities.Utilities;
+import de.soderer.utilities.StringUtilities;
 
 /**
  * Access data of a remote server for the protocols ssh, sftp, ftp, smb, smb1, http and https
@@ -57,7 +57,7 @@ public class ServerAccessData {
 	 * @throws IllegalArgumentException if the protocol is empty or unsupported, or a parameter is set that the protocol does not support
 	 */
 	public ServerAccessData(final String protocol, final String hostname, final int port, final String sharename, final String username, final String keyFilePath, final char[] password, final String hostKey) {
-		if (Utilities.isBlank(protocol)) {
+		if (StringUtilities.isBlank(protocol)) {
 			throw new IllegalArgumentException("Invalid empty protocol");
 		} else {
 			this.protocol = protocol.trim().toLowerCase(Locale.ROOT);
@@ -68,7 +68,7 @@ public class ServerAccessData {
 				this.keyFilePath = keyFilePath;
 				this.password = password;
 				this.hostKey = hostKey;
-				if (Utilities.isNotBlank(sharename)) {
+				if (StringUtilities.isNotBlank(sharename)) {
 					throw new IllegalArgumentException("Invalid argument sharename '" + sharename + "' for protocol: " + this.protocol);
 				}
 			} else 	if ("ftp".equalsIgnoreCase(this.protocol)) {
@@ -76,11 +76,11 @@ public class ServerAccessData {
 				this.port = port;
 				this.username = username;
 				this.password = password;
-				if (Utilities.isNotBlank(keyFilePath)) {
+				if (StringUtilities.isNotBlank(keyFilePath)) {
 					throw new IllegalArgumentException("Invalid argument keyFilePath '" + keyFilePath + "' for protocol: " + this.protocol);
-				} else if (Utilities.isNotBlank(hostKey)) {
+				} else if (StringUtilities.isNotBlank(hostKey)) {
 					throw new IllegalArgumentException("Invalid argument hostKey '" + hostKey + "' for protocol: " + this.protocol);
-				} else if (Utilities.isNotBlank(sharename)) {
+				} else if (StringUtilities.isNotBlank(sharename)) {
 					throw new IllegalArgumentException("Invalid argument sharename '" + sharename + "' for protocol: " + this.protocol);
 				}
 			} else if ("smb".equalsIgnoreCase(this.protocol) || "smb1".equalsIgnoreCase(this.protocol)) {
@@ -89,9 +89,9 @@ public class ServerAccessData {
 				this.sharename = sharename;
 				this.username = username;
 				this.password = password;
-				if (Utilities.isNotBlank(keyFilePath)) {
+				if (StringUtilities.isNotBlank(keyFilePath)) {
 					throw new IllegalArgumentException("Invalid argument keyFilePath '" + keyFilePath + "' for protocol: " + this.protocol);
-				} else if (Utilities.isNotBlank(hostKey)) {
+				} else if (StringUtilities.isNotBlank(hostKey)) {
 					throw new IllegalArgumentException("Invalid argument hostKey '" + hostKey + "' for protocol: " + this.protocol);
 				}
 			} else if ("http".equalsIgnoreCase(this.protocol) || "https".equalsIgnoreCase(this.protocol)) {
@@ -100,9 +100,9 @@ public class ServerAccessData {
 				this.port = port;
 				this.username = username;
 				this.password = password;
-				if (Utilities.isNotBlank(keyFilePath)) {
+				if (StringUtilities.isNotBlank(keyFilePath)) {
 					throw new IllegalArgumentException("Invalid argument keyFilePath '" + keyFilePath + "' for protocol: " + this.protocol);
-				} else if (Utilities.isNotBlank(hostKey)) {
+				} else if (StringUtilities.isNotBlank(hostKey)) {
 					throw new IllegalArgumentException("Invalid argument hostKey '" + hostKey + "' for protocol: " + this.protocol);
 				}
 			} else {
@@ -208,7 +208,7 @@ public class ServerAccessData {
 	 * @throws Exception if the string has no prelude or no ':'
 	 */
 	public static String parseFilestringToServerEntryName(final String fileName) throws Exception {
-		if (Utilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.contains(":")) {
+		if (StringUtilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.contains(":")) {
 			return fileName.substring(PRELUDE.length(), fileName.lastIndexOf(":"));
 		} else {
 			throw new Exception("Invalid SSH-filename");
@@ -223,7 +223,7 @@ public class ServerAccessData {
 	 * @throws Exception if the string has no prelude or no ':'
 	 */
 	public static String parseFilestringToFilePath(final String fileName) throws Exception {
-		if (Utilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.contains(":")) {
+		if (StringUtilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.contains(":")) {
 			return fileName.substring(fileName.lastIndexOf(":") + 1);
 		} else {
 			throw new Exception("Invalid SSH-filename");

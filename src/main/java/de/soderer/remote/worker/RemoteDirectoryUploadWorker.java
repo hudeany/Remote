@@ -9,7 +9,7 @@ import java.nio.file.Files;
 
 import de.soderer.remote.RemoteConnection;
 import de.soderer.utilities.FileUtilities;
-import de.soderer.utilities.Utilities;
+import de.soderer.utilities.StringUtilities;
 import de.soderer.utilities.worker.WorkerDual;
 import de.soderer.utilities.worker.WorkerParentDual;
 
@@ -67,7 +67,7 @@ public class RemoteDirectoryUploadWorker extends WorkerDual<RemoteDirectoryUploa
 			throw new Exception("Source directory not found: \"" + localDirectory.getAbsolutePath() + "\"");
 		} else if (!localDirectory.isDirectory()) {
 			throw new Exception("Source directory is no directory: \"" + localDirectory.getAbsolutePath() + "\"");
-		} else if (Utilities.isBlank(remoteParentDirectoryPath)) {
+		} else if (StringUtilities.isBlank(remoteParentDirectoryPath)) {
 			throw new Exception("No remoteParentDirectoryPath");
 		} else if (!"/".equals(remoteParentDirectoryPath) && connection.getFolderInfo(remoteParentDirectoryPath) == null) {
 			throw new Exception("Remote directory not found or is no directory: \"" + remoteParentDirectoryPath + "\"");
@@ -78,7 +78,7 @@ public class RemoteDirectoryUploadWorker extends WorkerDual<RemoteDirectoryUploa
 			this.remoteParentDirectoryPath = this.remoteParentDirectoryPath.substring(0, this.remoteParentDirectoryPath.length() - 1);
 		}
 
-		if (Utilities.isBlank(remoteDirectoryName)) {
+		if (StringUtilities.isBlank(remoteDirectoryName)) {
 			this.remoteDirectoryName = this.localDirectory.getName();
 		} else {
 			this.remoteDirectoryName = remoteDirectoryName;

@@ -23,7 +23,7 @@ import java.util.Locale;
 import de.soderer.utilities.DateUtilities;
 import de.soderer.utilities.FileUtilities;
 import de.soderer.utilities.IoUtilities;
-import de.soderer.utilities.Utilities;
+import de.soderer.utilities.StringUtilities;
 
 /**
  * Read-only remote connection to files offered by a web server with directory listings (Apache style "index of" pages).
@@ -304,7 +304,7 @@ public class HttpFileConnection implements RemoteConnection {
 	@Override
 	public FolderInfo getFolderInfo(String folderPath) throws Exception {
 		folderPath = FileUtilities.trimLeadingFileSeparator(FileUtilities.trimTrailingFileSeparator(folderPath));
-		final String folderName = Utilities.isEmpty(folderPath) ? "/" : FileUtilities.getFilenameFromPath(folderPath);
+		final String folderName = StringUtilities.isEmpty(folderPath) ? "/" : FileUtilities.getFilenameFromPath(folderPath);
 		try {
 			// The trailing "/" requests the directory listing; for a file path the server answers with 404
 			final URLConnection urlConnection = openUrlConnection(folderPath.length() == 0 ? "" : folderPath + "/");
@@ -331,7 +331,7 @@ public class HttpFileConnection implements RemoteConnection {
 				(useTLS ? "https://" : "http://")
 				+ hostname
 				+ (useTLS ? (port == 443 ? "" : ":" + port) : (port == 80 ? "" : ":" + port))
-				+ (Utilities.isNotBlank(FileUtilities.trimLeadingFileSeparator(startPath)) ? "/" + encodePath(FileUtilities.trimTrailingFileSeparator(FileUtilities.trimLeadingFileSeparator(startPath))) : "")
+				+ (StringUtilities.isNotBlank(FileUtilities.trimLeadingFileSeparator(startPath)) ? "/" + encodePath(FileUtilities.trimTrailingFileSeparator(FileUtilities.trimLeadingFileSeparator(startPath))) : "")
 				+ "/" + encodePath(path)
 				+ (username != null ? "?username=" + URLEncoder.encode(username, StandardCharsets.UTF_8) + (password != null ? "&password=" + URLEncoder.encode(password, StandardCharsets.UTF_8) : "") : "")
 				).toURL();

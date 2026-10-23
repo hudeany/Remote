@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import de.soderer.utilities.DateUtilities;
-import de.soderer.utilities.Utilities;
+import de.soderer.utilities.StringUtilities;
 
 /**
  * File information parsed from a line of an "ls -l" listing (as received via an SSH exec channel).
@@ -45,7 +45,7 @@ public class JschFileData {
 	 * @throws Exception if the line cannot be parsed
 	 */
 	public JschFileData(final String dataString) throws Exception {
-		if (Utilities.isBlank(dataString)) {
+		if (StringUtilities.isBlank(dataString)) {
 			throw new Exception("Invalid file data string: " + dataString);
 		}
 		// -rw-r--r-- 1 root root 23 Feb 2 23:37 test.txt

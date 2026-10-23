@@ -1,6 +1,6 @@
 package de.soderer.remote;
 
-import de.soderer.utilities.Utilities;
+import de.soderer.utilities.StringUtilities;
 
 /**
  * Descriptor of a remote file or directory for SCP transfers in the form "\\hostname/path/filename".
@@ -32,16 +32,16 @@ public class SCPFile {
 	 * @param hostnamePathAndFileName file descriptor
 	 * @throws Exception if the descriptor is empty, lacks the prelude, a path or a hostname
 	 */
-	public SCPFile(String hostnamePathAndFileName) throws Exception {
-		if (Utilities.isEmpty(hostnamePathAndFileName)) {
+	public SCPFile(final String hostnamePathAndFileName) throws Exception {
+		if (StringUtilities.isEmpty(hostnamePathAndFileName)) {
 			throw new Exception("SCPFile: Empty filespecifier");
 		}
 		if (!hostnamePathAndFileName.startsWith(PRELUDE)) {
 			throw new Exception("SCPFile: Invalid prelude in filespecifier: " + hostnamePathAndFileName);
 		}
 
-		int firstIndexOfUnixPathSeparator = hostnamePathAndFileName.indexOf(UNIX_SEPARATOR, PRELUDE.length());
-		int firstIndexOfWindowsPathSeparator = hostnamePathAndFileName.indexOf(DOS_SEPARATOR, PRELUDE.length());
+		final int firstIndexOfUnixPathSeparator = hostnamePathAndFileName.indexOf(UNIX_SEPARATOR, PRELUDE.length());
+		final int firstIndexOfWindowsPathSeparator = hostnamePathAndFileName.indexOf(DOS_SEPARATOR, PRELUDE.length());
 		int firstIndexOfPathSeparator = -1;
 		if (firstIndexOfUnixPathSeparator != -1 && firstIndexOfWindowsPathSeparator != -1) {
 			firstIndexOfPathSeparator = Math.min(firstIndexOfUnixPathSeparator, firstIndexOfWindowsPathSeparator);
@@ -64,7 +64,7 @@ public class SCPFile {
 			throw new Exception("SCPFile: Missing path- or filedescription in filespecifier: " + hostnamePathAndFileName);
 		}
 
-		if (Utilities.isEmpty(hostname)) {
+		if (StringUtilities.isEmpty(hostname)) {
 			throw new Exception("SCPFile: Empty hostname: " + hostnamePathAndFileName);
 		}
 	}
@@ -77,11 +77,11 @@ public class SCPFile {
 	 * @param filename filename (may contain wildcards like '*'), or null for the directory itself
 	 * @throws Exception if hostname or path is empty or the filename contains a path separator
 	 */
-	public SCPFile(String hostname, String path, String filename) throws Exception {
-		if (Utilities.isEmpty(hostname)) {
+	public SCPFile(final String hostname, final String path, final String filename) throws Exception {
+		if (StringUtilities.isEmpty(hostname)) {
 			throw new Exception("SCPFile: Empty hostname");
 		}
-		if (Utilities.isEmpty(path)) {
+		if (StringUtilities.isEmpty(path)) {
 			throw new Exception("SCPFile: Empty path");
 		}
 		if (filename != null && (filename.contains(UNIX_SEPARATOR) || filename.contains(DOS_SEPARATOR))) {
@@ -100,7 +100,7 @@ public class SCPFile {
 	 * @param path directory path
 	 * @throws Exception if hostname or path is empty
 	 */
-	public SCPFile(String hostname, String path) throws Exception {
+	public SCPFile(final String hostname, final String path) throws Exception {
 		this(hostname, path, null);
 	}
 
@@ -119,7 +119,7 @@ public class SCPFile {
 	 * @param hostname hostname
 	 * @return this instance for chaining
 	 */
-	public SCPFile setHostname(String hostname) {
+	public SCPFile setHostname(final String hostname) {
 		this.hostname = hostname;
 		return this;
 	}
@@ -139,7 +139,7 @@ public class SCPFile {
 	 * @param path directory path, must not be null
 	 * @return this instance for chaining
 	 */
-	public SCPFile setPath(String path) {
+	public SCPFile setPath(final String path) {
 		if (path.endsWith(DOS_SEPARATOR) || path.endsWith(UNIX_SEPARATOR)) {
 			this.path = path;
 		} else if (path.contains(DOS_SEPARATOR)) {
@@ -167,7 +167,7 @@ public class SCPFile {
 	 */
 	@Override
 	public String toString() {
-		if (Utilities.isEmpty(filename)) {
+		if (StringUtilities.isEmpty(filename)) {
 			return PRELUDE + hostname + path;
 		} else {
 			return PRELUDE + hostname + path + filename;
@@ -180,7 +180,7 @@ public class SCPFile {
 	 * @return path and filename, or only the path for a directory descriptor
 	 */
 	public String getPathAndFilename() {
-		if (Utilities.isEmpty(filename)) {
+		if (StringUtilities.isEmpty(filename)) {
 			return path;
 		} else {
 			return path + filename;
@@ -196,7 +196,7 @@ public class SCPFile {
 	 * @return this instance for chaining
 	 * @throws Exception if the filename contains a path separator
 	 */
-	public SCPFile setFilename(String filename) throws Exception {
+	public SCPFile setFilename(final String filename) throws Exception {
 		if (filename != null && (filename.contains(UNIX_SEPARATOR) || filename.contains(DOS_SEPARATOR))) {
 			throw new Exception("SCPFile: Invalid new filename: " + filename);
 		}
@@ -220,7 +220,7 @@ public class SCPFile {
 	 * @return true for a directory
 	 */
 	public boolean isDirectory() {
-		return Utilities.isEmpty(filename);
+		return StringUtilities.isEmpty(filename);
 	}
 
 	/**
@@ -240,11 +240,11 @@ public class SCPFile {
 	 */
 	public SCPFile getParent() throws Exception {
 		if (isDirectory()) {
-			String newPath = path.substring(0, path.length() - 1);
+			final String newPath = path.substring(0, path.length() - 1);
 			if (newPath.length() == 0) {
 				throw new Exception("SCPFile: No parentpath available for: " + path);
 			}
-			int lastIndexOfPathSeparator = Math.max(newPath.lastIndexOf(UNIX_SEPARATOR), newPath.lastIndexOf(DOS_SEPARATOR));
+			final int lastIndexOfPathSeparator = Math.max(newPath.lastIndexOf(UNIX_SEPARATOR), newPath.lastIndexOf(DOS_SEPARATOR));
 			return new SCPFile(hostname, newPath.substring(0, lastIndexOfPathSeparator + 1));
 		} else {
 			return new SCPFile(hostname, path); // without filename => directory

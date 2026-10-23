@@ -20,7 +20,7 @@ import org.codelibs.jcifs.smb.impl.SmbFile;
 
 import de.soderer.utilities.FileUtilities;
 import de.soderer.utilities.IoUtilities;
-import de.soderer.utilities.Utilities;
+import de.soderer.utilities.StringUtilities;
 
 /**
  * SMB remote connection based on jcifs (org.codelibs:jcifs 3.x).
@@ -135,7 +135,7 @@ public class SmbConnection implements RemoteConnection {
 			properties.setProperty("jcifs.client.allowGuestFallback", "false");
 
 			final CIFSContext baseContext = new BaseContext(new PropertyConfiguration(properties));
-			if (Utilities.isNotBlank(username)) {
+			if (StringUtilities.isNotBlank(username)) {
 				// jcifs keeps the password internally as String, so the char[] cannot be wiped completely
 				context = baseContext.withCredentials(new NtlmPasswordAuthenticator("", username, password == null ? "" : new String(password)));
 			} else {
@@ -361,7 +361,7 @@ public class SmbConnection implements RemoteConnection {
 		checkForConnection();
 		final String normalized = normalizePath(folderPath);
 		String folderName = getLastPathElement(normalized);
-		if (Utilities.isEmpty(folderName)) {
+		if (StringUtilities.isEmpty(folderName)) {
 			folderName = "/";
 		}
 

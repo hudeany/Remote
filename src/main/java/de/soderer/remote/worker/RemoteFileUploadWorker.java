@@ -8,7 +8,7 @@ import java.io.InputStream;
 
 import de.soderer.remote.RemoteConnection;
 import de.soderer.utilities.FileUtilities;
-import de.soderer.utilities.Utilities;
+import de.soderer.utilities.StringUtilities;
 import de.soderer.utilities.worker.WorkerParentSimple;
 import de.soderer.utilities.worker.WorkerSimple;
 
@@ -60,7 +60,7 @@ public class RemoteFileUploadWorker extends WorkerSimple<RemoteFileUploadWorker>
 			this.remoteFilePath = remoteFilePath;
 		}
 
-		if (Utilities.isBlank(this.remoteFilePath)) {
+		if (StringUtilities.isBlank(this.remoteFilePath)) {
 			throw new Exception("No remoteFilePath");
 		} else if (!"/".equals(FileUtilities.getParentFromPath(this.remoteFilePath)) && connection.getFolderInfo(FileUtilities.getParentFromPath(this.remoteFilePath)) == null) {
 			throw new Exception("Remote file parent folder does not exist: \"" + this.remoteFilePath + "\"");

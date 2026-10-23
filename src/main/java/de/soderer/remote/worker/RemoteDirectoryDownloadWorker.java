@@ -10,6 +10,7 @@ import de.soderer.remote.FileInfo;
 import de.soderer.remote.FolderInfo;
 import de.soderer.remote.RemoteConnection;
 import de.soderer.utilities.FileUtilities;
+import de.soderer.utilities.StringUtilities;
 import de.soderer.utilities.Utilities;
 import de.soderer.utilities.worker.WorkerDual;
 import de.soderer.utilities.worker.WorkerParentDual;
@@ -52,7 +53,7 @@ public class RemoteDirectoryDownloadWorker extends WorkerDual<RemoteDirectoryDow
 
 		if (connection == null) {
 			throw new Exception("No RemoteConnection");
-		} else if (Utilities.isBlank(remoteDirectoryPath)) {
+		} else if (StringUtilities.isBlank(remoteDirectoryPath)) {
 			throw new Exception("No remoteDirectoryPath");
 		} else if (localParentDirectory == null) {
 			throw new Exception("No localDestination");
@@ -61,9 +62,9 @@ public class RemoteDirectoryDownloadWorker extends WorkerDual<RemoteDirectoryDow
 		this.connection = connection;
 		this.remoteDirectoryPath = FileUtilities.trimTrailingFileSeparator(remoteDirectoryPath);
 		this.localParentDirectory = localParentDirectory;
-		if (Utilities.isBlank(localDirectoryName)) {
+		if (StringUtilities.isBlank(localDirectoryName)) {
 			this.localDirectoryName = FileUtilities.getFilenameFromPath(this.remoteDirectoryPath);
-			if (Utilities.isBlank(this.localDirectoryName)) {
+			if (StringUtilities.isBlank(this.localDirectoryName)) {
 				throw new Exception("Cannot derive the local directory name from remote directory \"" + remoteDirectoryPath + "\", localDirectoryName is needed");
 			}
 		} else {

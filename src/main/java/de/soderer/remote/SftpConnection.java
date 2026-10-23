@@ -40,6 +40,7 @@ import de.soderer.remote.SshFileChangeWatcherThread.LineListener;
 import de.soderer.utilities.ExceptionUtilities;
 import de.soderer.utilities.FileUtilities;
 import de.soderer.utilities.IoUtilities;
+import de.soderer.utilities.StringUtilities;
 import de.soderer.utilities.Utilities;
 
 /**
@@ -131,7 +132,7 @@ public class SftpConnection implements RemoteConnection {
 			hostname = serverEntry.getHostname();
 			username = serverEntry.getUsername();
 			// Password only access data have no key file
-			keyFileData = Utilities.isBlank(serverEntry.getKeyFile()) ? null : FileUtilities.readFileToByteArray(new File(Utilities.replaceUsersHome(serverEntry.getKeyFile())));
+			keyFileData = StringUtilities.isBlank(serverEntry.getKeyFile()) ? null : FileUtilities.readFileToByteArray(new File(Utilities.replaceUsersHome(serverEntry.getKeyFile())));
 			password = serverEntry.getPassword();
 			port = serverEntry.getPort();
 			hostKey = serverEntry.getHostKey();
@@ -648,7 +649,7 @@ public class SftpConnection implements RemoteConnection {
 
 		final String remoteHostPath = getPathOfPathAndFileName(remoteHostPathAndFileName);
 		String remoteHostFileName = getFileNameOfPathAndFileName(remoteHostPathAndFileName);
-		if (Utilities.isEmpty(remoteHostFileName)) {
+		if (StringUtilities.isEmpty(remoteHostFileName)) {
 			remoteHostFileName = getFileNameOfPathAndFileName(localPathAndFileName);
 		}
 		checkScpFileName(remoteHostFileName);
@@ -954,8 +955,8 @@ public class SftpConnection implements RemoteConnection {
 	public String executeCommand(final String command) throws Exception {
 		final CommandResult result = executeCommandWithResult(command);
 		if (!result.isSuccessful()) {
-			throw new Exception("Command exited with code " + result.getExitCode() + (Utilities.isNotBlank(result.getStdErr()) ? ":\n" + result.getStdErr() : ""));
-		} else if (Utilities.isNotBlank(result.getStdOut())) {
+			throw new Exception("Command exited with code " + result.getExitCode() + (StringUtilities.isNotBlank(result.getStdErr()) ? ":\n" + result.getStdErr() : ""));
+		} else if (StringUtilities.isNotBlank(result.getStdOut())) {
 			return result.getStdOut();
 		} else {
 			// Some commands write to stderr although nothing went wrong
@@ -1031,7 +1032,7 @@ public class SftpConnection implements RemoteConnection {
 			closeQuietly(channel);
 		}
 
-		if (Utilities.isEmpty(folderName)) {
+		if (StringUtilities.isEmpty(folderName)) {
 			folderName = "/";
 		}
 		return new FolderInfo(folderName, modificationDate);
@@ -1161,7 +1162,7 @@ public class SftpConnection implements RemoteConnection {
 	 * Returns a folder path ending with "/" ("./" for an empty path, which means the home folder).
 	 */
 	private static String toFolderPathWithTrailingSeparator(final String folderPath) {
-		if (Utilities.isEmpty(folderPath)) {
+		if (StringUtilities.isEmpty(folderPath)) {
 			return "./";
 		} else {
 			return folderPath.endsWith("/") ? folderPath : folderPath + "/";
@@ -1185,7 +1186,7 @@ public class SftpConnection implements RemoteConnection {
 	 * separators, which would corrupt the protocol.
 	 */
 	private static void checkScpFileName(final String fileName) throws Exception {
-		if (Utilities.isEmpty(fileName) || fileName.contains("/") || fileName.contains("\n") || fileName.contains("\r") || ".".equals(fileName) || "..".equals(fileName)) {
+		if (StringUtilities.isEmpty(fileName) || fileName.contains("/") || fileName.contains("\n") || fileName.contains("\r") || ".".equals(fileName) || "..".equals(fileName)) {
 			throw new Exception("Invalid file name for scp upload: '" + fileName + "'");
 		}
 	}
@@ -1228,7 +1229,7 @@ public class SftpConnection implements RemoteConnection {
 	}
 
 	private static String getFileNameOfPathAndFileName(final String pathAndFileName) {
-		if (Utilities.isEmpty(pathAndFileName)) {
+		if (StringUtilities.isEmpty(pathAndFileName)) {
 			return null;
 		} else {
 			final int lastIndexOfPathSeparator = Math.max(pathAndFileName.lastIndexOf("/"), pathAndFileName.lastIndexOf("\\"));
@@ -1237,7 +1238,7 @@ public class SftpConnection implements RemoteConnection {
 	}
 
 	private static String getPathOfPathAndFileName(final String pathAndFileName) {
-		if (Utilities.isEmpty(pathAndFileName)) {
+		if (StringUtilities.isEmpty(pathAndFileName)) {
 			return null;
 		} else {
 			final int lastIndexOfPathSeparator = Math.max(pathAndFileName.lastIndexOf("/"), pathAndFileName.lastIndexOf("\\"));
@@ -1363,7 +1364,7 @@ public class SftpConnection implements RemoteConnection {
 	}
 
 	@Override
-	public DirectoryListing getDirectory(String folderPath) throws Exception {
+	public DirectoryListing getDirectory(final String folderPath) throws Exception {
 		final List<FileInfo> fileInfoList = new ArrayList<>();
 		final List<FolderInfo> folderInfoList = new ArrayList<>();
 
