@@ -1,6 +1,8 @@
-/bin/
-/build/
+/target
+/bin
 /build.version
-/lib_test/
+/build/
 /lib/
 /lib_build/
+/lib_test/
+/lib_coverage/
