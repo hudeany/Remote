@@ -136,10 +136,11 @@ public class ServerAccessDataTest {
 	}
 
 	@Test
-	public void testParseFilestringUsesLastColon() throws Exception {
-		final String fileString = ServerAccessData.PRELUDE + "server:with:colons:/file";
-		assertEquals("server:with:colons", ServerAccessData.parseFilestringToServerEntryName(fileString));
-		assertEquals("/file", ServerAccessData.parseFilestringToFilePath(fileString));
+	public void testParseFilestringSplitsAtFirstColon() throws Exception {
+		// Server entry names must not contain colons, but file paths may
+		final String fileString = ServerAccessData.PRELUDE + "server:/path/with:colons/log_12:30.txt";
+		assertEquals("server", ServerAccessData.parseFilestringToServerEntryName(fileString));
+		assertEquals("/path/with:colons/log_12:30.txt", ServerAccessData.parseFilestringToFilePath(fileString));
 	}
 
 	@Test
