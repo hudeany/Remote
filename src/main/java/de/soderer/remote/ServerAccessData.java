@@ -208,8 +208,9 @@ public class ServerAccessData {
 	 * @throws Exception if the string has no prelude or no ':'
 	 */
 	public static String parseFilestringToServerEntryName(final String fileName) throws Exception {
-		if (StringUtilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.contains(":")) {
-			return fileName.substring(PRELUDE.length(), fileName.lastIndexOf(":"));
+		// Entry names must not contain ':', but remote paths may (e.g. "C:/..." on Windows servers or "a:b.txt"), so split at the first ':'
+		if (StringUtilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.indexOf(":", PRELUDE.length()) > PRELUDE.length()) {
+			return fileName.substring(PRELUDE.length(), fileName.indexOf(":", PRELUDE.length()));
 		} else {
 			throw new Exception("Invalid SSH-filename");
 		}
@@ -223,8 +224,8 @@ public class ServerAccessData {
 	 * @throws Exception if the string has no prelude or no ':'
 	 */
 	public static String parseFilestringToFilePath(final String fileName) throws Exception {
-		if (StringUtilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.contains(":")) {
-			return fileName.substring(fileName.lastIndexOf(":") + 1);
+		if (StringUtilities.isNotBlank(fileName) && fileName.startsWith(PRELUDE) && fileName.indexOf(":", PRELUDE.length()) > PRELUDE.length()) {
+			return fileName.substring(fileName.indexOf(":", PRELUDE.length()) + 1);
 		} else {
 			throw new Exception("Invalid SSH-filename");
 		}
